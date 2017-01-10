@@ -3,8 +3,8 @@
 #include <Servo.h>
 
 //WiFi
-const char wifissid[] = "MDPAHome";
-const char wifipsk[] = "migasumi2009";
+const char wifissid[] = "YOUR_NETWORK_NAME";
+const char wifipsk[] = "YOUR_NETWORK_PASSWORD";
 
 //LED Definitions
 const int SERVO_PIN = 16; // labeled D0
