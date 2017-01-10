@@ -1,15 +1,26 @@
+// Use:
+// 1. Connect a servo to ESP-12e; input to servo is pin D0.
+// 2. Upload this code on the Arduino IDE and open the Serial Monitor.
+// 3. On a device connected to same wifi network as the ESP-12e,
+//    visit the IP address printed by Serial Monitor on any web browser.
+//    Full URL is of the form: IP_ADDRESS/servo/ANGLE
+// 4. Change the value of ANGLE (integer from 0-180) and watch the servo move.
+
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <Servo.h>
 
-//WiFi
+// Inspired by Jeffrey App's Youtube video: https://www.youtube.com/watch?v=MN9-_hOpf_c
+
+// WiFi
 const char wifissid[] = "YOUR_NETWORK_NAME";
 const char wifipsk[] = "YOUR_NETWORK_PASSWORD";
 
-//LED Definitions
+// Servo Definitions
 const int SERVO_PIN = 16; // labeled D0
 
-Servo servo1;  // servo control object
+// Servo control object
+Servo servo1;  
 
 WiFiServer server(80);
 
@@ -30,7 +41,7 @@ void loop() {
     return;
   }
 
-  //Read the first line of the request
+  // Read the first line of the request
   String req = client.readStringUntil('\r');
   Serial.println(req);
   client.flush();
@@ -39,31 +50,26 @@ void loop() {
   int ang = -1;
   String digits_start_after = "/servo/";
   String ang_string = getDigitStringAfter(req, digits_start_after);
-//  String ang_string = "";
-//  int digit_index = req.indexOf(digit_starts_after) + digit_starts_after.length();
-//  for (char gotChar = req.charAt(digit_index); isDigit(gotChar); gotChar = req.charAt(++digit_index)) { // get input digit
-//    ang_string += req.charAt(digit_index);
-//  }
 
   if (ang_string != "") {
     ang = ang_string.toInt(); // ang remains -1 if ang_string did not start with integers
     ang = constrain(ang, 0, 180); // servo can only move to positions at 0 to 180 degrees
   }
 
-  //Set GPIOs according to the request.
+  // Set GPIOs according to the request.
   if (ang >= 0 && prev_ang != ang) {
      servo1.write(ang);
      prev_ang = ang;
   }
    client.flush();
 
-   //Prepare html response
+   // Prepare html response
 
    String s = "HTTP/1.1 200 OK\r\n";
    s += "Content Type: text/html\r\n\r\n";
    s += "<!DOCTYPE HTML>\r\n<html>\r\n";
 
-   //Print a message
+   // Print a message
    if (ang >= 0) {
     s += "SERVO is at " + String(ang);
     s += " degrees.";
@@ -73,7 +79,7 @@ void loop() {
    }
    s += "</html>\n";
 
-   //send response to the client
+   // Send response to the client
    client.print(s);
    delay(1000); // pause 1s to get servo time to move
    Serial.println("Client disconnected");
@@ -81,11 +87,9 @@ void loop() {
 }
 
 void connectWiFi() {
-  byte ledStatus = LOW;
   Serial.println();
   Serial.println("Connecting to: " + String(wifissid));
   WiFi.mode(WIFI_STA);
-
   WiFi.begin(wifissid,wifipsk);
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -97,9 +101,8 @@ void connectWiFi() {
   Serial.println(WiFi.localIP());  
 }
 
-void setupMDNS()
-{
-  //Call mdns to setup mdns to pint to domain.local
+void setupMDNS() {
+  // Call mdns to setup mdns to pint to domain.local
   if (!MDNS.begin("begins-mdns"))
   {
     Serial.println("Error setting up MDNS responder!");
@@ -110,8 +113,7 @@ void setupMDNS()
   Serial.println("mDNS responder started");
 }
 
-void initHardWare()
-{
+void initHardWare() {
   Serial.begin(115200);
   pinMode(SERVO_PIN, OUTPUT);
   servo1.attach(SERVO_PIN);
