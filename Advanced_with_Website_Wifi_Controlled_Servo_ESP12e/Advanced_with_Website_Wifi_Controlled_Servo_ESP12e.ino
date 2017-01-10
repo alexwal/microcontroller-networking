@@ -136,7 +136,7 @@ String getDigitStringAfter(String input, String pattern) {
   String found_string = "";
   int digit_index = input.indexOf(pattern) + pattern.length();
   for (char gotChar = input.charAt(digit_index); isDigit(gotChar); gotChar = input.charAt(++digit_index)) { // get input digit
-    found_string += input.charAt(digit_index);
+    found_string += gotChar;
   }
   return found_string;
 }
